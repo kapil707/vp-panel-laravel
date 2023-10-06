@@ -25,11 +25,17 @@ if ( ! function_exists('publish_panel_right_top'))
 						</label>
 					</div>
 					<div class="col-sm-12">
-						<select name="status" id="status" data-placeholder="Select Status" class="chosen-select" >
-							<option value="1" <?php if(!empty($row)) {if($row->status==1) { ?> selected <?php } }?>>
+						<select name="status" id="status" data-placeholder="Select Status" class="chosen-select">
+							<?php
+							$status = 0;
+							if(!empty($row)){
+								$status = $row->status;
+							}
+							?>
+							<option value="1" <?php if($status==1) { ?> selected <?php } ?>>
 								Active
 							</option>
-							<option value="0" <?php if(!empty($row)) {if($row->status==0) { ?> selected <?php } }?>>
+							<option value="0" <?php if($status==0) { ?> selected <?php } ?>>
 								Inactive
 							</option>
 						</select>

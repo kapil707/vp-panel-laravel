@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Crypt;
 
 class AdminController extends Controller
 {
+    var $Page_title = "Manage Dashbord";
     public function admin_submit(Request $request){
         $request->validate([
             'username'=>'required',
@@ -34,12 +35,21 @@ class AdminController extends Controller
 
     public function dashboard(){
 
+        $Page_title = $this->Page_title;
+
         $data["Page_menu"] = "dashboard";
         $data["page_type"] = "dashboard";
         $data["page_child_page"] = "title";
         $data["Page_name"] = "title";
         $data["title1"] = "title";
         $data["title1"] = "title";
+
+        $breadcrumbs = array(
+            "Admin"=>"vp-admin/",
+            "$Page_title"=>"vp-admin/dashboard/view",
+            "View"=>"",);
+        $data["breadcrumbs"] = $breadcrumbs;
+        
         return view('vp-admin/dashboard/index')->with($data);
     }
 

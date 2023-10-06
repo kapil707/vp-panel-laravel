@@ -6,6 +6,7 @@
 		</a>
 	</div>
 	<form class="form-horizontal" role="form" method="post" enctype="multipart/form-data">
+		@csrf
 		<div class="col-xs-9">
 			<div class="ibox float-e-margins">
 				<div class="ibox-content">
@@ -16,7 +17,7 @@
 							</label>
 						</div>
 						<div class="col-sm-12">
-							<input type="text" class="form-control title" id="form-field-1" placeholder="Title" name="title" value="" onchange="onchange_title()" />
+							<input type="text" class="form-control title" id="form-field-1" placeholder="Title" name="title" value=""  />
 						</div>
 						<div class="help-inline col-sm-12 has-error">
 							<span class="help-block reset middle">

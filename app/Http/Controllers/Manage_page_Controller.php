@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Session;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\Manage_page_Model;
 
 class Manage_page_Controller extends Controller
 {
@@ -13,8 +14,7 @@ class Manage_page_Controller extends Controller
 	var $Page_menu  = "manage_page";
 	var $page_controllers = "manage_page";
 	var $Page_tbl   = "tbl_page";
-
-	public function index($my_page="")
+	public function index(Request $request,$action_type="")
 	{
 		/******************session***********************/
 		$user_id = Session::get('admin_user_id');
@@ -32,6 +32,10 @@ class Manage_page_Controller extends Controller
 		$data['Page_name'] = $Page_name;
 		$data['Page_menu'] = $Page_menu;
 
+		if($action_type==""){
+			return redirect("vp-admin/".$page_controllers."/view");
+		}
+
         $breadcrumbs = array(
             "Admin"=>"vp-admin/",
             "$Page_title"=>"vp-admin/$page_controllers/view",
@@ -45,108 +49,46 @@ class Manage_page_Controller extends Controller
         $data['page_url'] = "";
 
 		$page_type = "page";
-        $where = array('page_type'=>$page_type);
-  		$data["result"] = DB::table($tbl)->where($where)->get();
 
-		return view("vp-admin/$Page_view/$my_page")->with($data);
-	}
-	public function edit($id)
-	{
-		/******************session***********************/
-		$user_id = $this->session->userdata("user_id");
-		$user_type = $this->session->userdata("user_type");
-		/******************session***********************/
-		$Page_title = $this->Page_title;
-		$Page_name 	= $this->Page_name;
-		$Page_view 	= $this->Page_view;
-		$Page_menu 	= $this->Page_menu;
-		$Page_tbl 	= $this->Page_tbl;
-		$page_controllers 	= $this->page_controllers;
-		$this->Admin_Model->permissions_check_or_set($Page_title,$Page_name,$user_type);
-		$data['title1'] = $Page_title." || Edit";
-		$data['title2'] = "Edit";
-		$data['Page_name'] = $Page_name;
-		$data['Page_menu'] = $Page_menu;
-		$this->breadcrumbs->push("Edit","admin/");
-		$this->breadcrumbs->push("$Page_title","admin/$page_controllers/");
-		$this->breadcrumbs->push("Edit","admin/$page_controllers/edit");
-		$tbl = $Page_tbl;
+		if($action_type=="add"){
+			$input = $request->all();
+			if(!empty($input)){
+				//print_r($input);
+				$Manage_page_Model = new Manage_page_Model();
 
-		$page_type = "page";
-		$system_ip = $this->input->ip_address();
-		extract($_POST);
-		if(isset($Submit))
-		{
-			$message_db = "";
-			$this->form_validation->set_rules('title','Title',"required");
-			/*if($url_old==$url){
-				$this->form_validation->set_rules('url', 'Url', "required|is_unique[$Page_tbl.url]");
-			}*/
-			if ($this->form_validation->run() == FALSE)
-			{
-				$message = "Check Validation.";
-				$this->session->set_flashdata("message_type","warning");
-			}
-			else
-			{
-				/***********************************************/
-				$this->Manage_field_group_model->insert_field_data();
-				/***********************************************/
+				$Manage_page_Model->title = $input['title'];
+				$Manage_page_Model->page_type = $page_type;
+				$Manage_page_Model->save();
+				$id = $Manage_page_Model->id;
 
-				$time = time();
-				$date = date("Y-m-d",$time);
-				$where = array('id'=>$id);
-
-				$result = "";
-				$dt = array(
-					'title'=>$title,
-					'description'=>$description,
-					'excerpt'=>$excerpt,
-					'image'=>$image,
-					'mobile_image'=>$mobile_image,
-					'page_type'=>$page_type,
-					'join_page_id'=>$join_page_id,
-					'update_date'=>$date,
-					'update_time'=>$time,
-					'system_ip'=>$system_ip,
-					'user_id'=>$user_id,
-					'status'=>$status,
-					'url'=>$url,);
-				$result = $this->Scheme_Model->edit_fun($tbl,$dt,$where);
-				$title = ($title);
-				$title = $old_title." - ($title)";
-				if($result)
-				{
-					$message_db = "$title - Edit Successfully.";
-					$message = "Edit Successfully.";
-					$this->session->set_flashdata("message_type","success");
-				}
-				else
-				{
-					$message_db = "$title - Not Add.";
-					$message = "Not Add.";
-					$this->session->set_flashdata("message_type","error");
-				}
-			}
-			if($message_db!="")
-			{
-				$message = $Page_title." - ".$message;
-				$message_db = $Page_title." - ".$message_db;
-				$this->session->set_flashdata("message_footer","yes");
-				$this->session->set_flashdata("full_message",$message);
-				$this->Admin_Model->Add_Activity_log($message_db);
-				if($result)
-				{
-					//redirect(current_url());
-					redirect(base_url()."admin/$page_controllers/edit/".$id);
-				}
+				return redirect("vp-admin/".$page_controllers."/edit?id=".$id);
 			}
 		}
-		$query = $this->db->query("select * from $tbl where id='$id'");
-  		$data["result"] = $query->result();
-		$this->load->view("admin/header_footer/header",$data);
-		$this->load->view("admin/$Page_view/edit",$data);
-		$this->load->view("admin/header_footer/footer",$data);
+
+		if($action_type=="edit"){
+			$id = $_GET["id"];
+
+			$input = $request->all();
+			if(!empty($input['title'])){
+				/********************************* */
+				$Manage_page_Model = Manage_page_Model::find($id);
+
+				$Manage_page_Model->title = $input['title'];
+				$Manage_page_Model->page_type = $page_type;
+				$Manage_page_Model->save();
+			}
+
+			/********************************* */
+			$where = array('page_type'=>$page_type,'id'=>$id);
+			$data["result"] = Manage_page_Model::where($where)->get();
+		}
+
+		if($action_type=="view"){
+        	$where = array('page_type'=>$page_type);
+  			$data["result"] = DB::table($tbl)->where($where)->get();
+		}
+
+		return view("vp-admin/$Page_view/$action_type")->with($data);
 	}
 
 	public function delete_page_rec()
