@@ -7,6 +7,7 @@
 	</div>
 	<form class="form-horizontal" role="form" method="post" enctype="multipart/form-data">
 		@csrf
+		<input type="hidden" name="post_data" value="add">
 		<div class="col-xs-9">
 			<div class="ibox float-e-margins">
 				<div class="ibox-content">
@@ -17,11 +18,13 @@
 							</label>
 						</div>
 						<div class="col-sm-12">
-							<input type="text" class="form-control title" id="form-field-1" placeholder="Title" name="title" value=""  />
+							<input type="text" class="form-control title" id="form-field-1" placeholder="Title" name="title" value="" onchange="onchange_title()" />
 						</div>
 						<div class="help-inline col-sm-12 has-error">
 							<span class="help-block reset middle">
-
+								@error('title')
+									{{$message}}
+								@enderror
 							</span>
 						</div>
 					</div>
@@ -37,7 +40,9 @@
 						</div>
 						<div class="help-inline col-sm-12 has-error">
 							<span class="help-block reset middle">
-
+								@error('description')
+									{{$message}}
+								@enderror
 							</span>
 						</div>
 					</div>
@@ -53,7 +58,9 @@
 						</div>
 						<div class="help-inline col-sm-12 has-error">
 							<span class="help-block reset middle">
-
+								@error('excerpt')
+									{{$message}}
+								@enderror
 							</span>
 						</div>
 					</div>
@@ -78,7 +85,9 @@
 						</div>
 						<div class="help-inline col-sm-12 has-error">
 							<span class="help-block reset middle url_error">
-
+								@error('url')
+									{{$message}}
+								@enderror
 							</span>
 						</div>
 					</div>
@@ -103,7 +112,7 @@ function onchange_title()
 		title = title.trim(title).replace(/ /g,'-');
 		title = encodeURI(title).replace(/[!\/\\#,+()$~%.'":*?<>{}]/g,'');
 		$(".url").val(title)
-		v = '<?= $page_url ?>/'+title;
+		v = '{{ URL("/").$page_url}}/'+title;
 		url1 = "Permalink : <a href='"+v+"' target='_blank'>"+v+"</a>";
 		$(".url1").html(url1)
 		check_url(title)
@@ -131,11 +140,13 @@ function check_url(url)
 
 	page_url = "<?= $page_url ?>";
 	id = "";
+	_token = "{{ csrf_token() }}",
 	$.ajax({
 	type       : "POST",
-	data       :  {url:url,id:id,page_url:page_url} ,
-	url        : "admin/<?= $Page_name?>/check_url_api",
+	data       :  {_token:_token,url:url,id:id,page_url:page_url} ,
+	url        : "{{ URL('vp-admin/')}}/<?= $Page_name?>/check_url_api",
 	success    : function(data){
+		alert(data)
 			if(data!="")
 			{
 				if(data=="Error")

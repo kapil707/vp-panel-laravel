@@ -14,7 +14,7 @@ class Manage_page_Controller extends Controller
 	var $Page_menu  = "manage_page";
 	var $page_controllers = "manage_page";
 	var $Page_tbl   = "tbl_page";
-	public function index(Request $request,$action_type="")
+	public function index(Request $request,$action_type="",$editid="")
 	{
 		/******************session***********************/
 		$user_id = Session::get('admin_user_id');
@@ -51,41 +51,76 @@ class Manage_page_Controller extends Controller
 		$page_type = "page";
 
 		if($action_type=="add"){
+
 			$input = $request->all();
-			if(!empty($input)){
-				//print_r($input);
-				$Manage_page_Model = new Manage_page_Model();
+			if(!empty($input['post_data']) && $input['post_data']=="add"){
+				$request->validate(
+					[
+						'title'=>'required'
+					]
+				);
+				/********************************* */
+				$dt = new Manage_page_Model();
 
-				$Manage_page_Model->title = $input['title'];
-				$Manage_page_Model->page_type = $page_type;
-				$Manage_page_Model->save();
-				$id = $Manage_page_Model->id;
+				$dt->page_type = $page_type;
+				$dt->status = $input['status'];
+				
+				$dt->title = $input['title'];
+				$dt->description = $input['description'];
+				$dt->excerpt = $input['excerpt'];
+				$dt->url = $input['url'];
+				$dt->save();
+				$id = $dt->id;
 
-				return redirect("vp-admin/".$page_controllers."/edit?id=".$id);
+				return redirect("vp-admin/".$page_controllers."/edit/".$id);
 			}
 		}
 
 		if($action_type=="edit"){
-			$id = $_GET["id"];
-
 			$input = $request->all();
-			if(!empty($input['title'])){
+			if(!empty($input['post_data']) && $input['post_data']=="edit"){
+				$request->validate(
+					[
+						'title'=>'required'
+					]
+				);
 				/********************************* */
-				$Manage_page_Model = Manage_page_Model::find($id);
+				$dt = Manage_page_Model::find($editid);
 
-				$Manage_page_Model->title = $input['title'];
-				$Manage_page_Model->page_type = $page_type;
-				$Manage_page_Model->save();
+				$dt->page_type = $page_type;
+				$dt->status = $input['status'];
+
+				$dt->title = $input['title'];
+				$dt->description = $input['description'];
+				$dt->excerpt = $input['excerpt'];
+				$dt->url = $input['url'];
+				$dt->save();
 			}
 
 			/********************************* */
-			$where = array('page_type'=>$page_type,'id'=>$id);
+			$where = array('page_type'=>$page_type,'id'=>$editid);
 			$data["result"] = Manage_page_Model::where($where)->get();
 		}
 
 		if($action_type=="view"){
         	$where = array('page_type'=>$page_type);
   			$data["result"] = DB::table($tbl)->where($where)->get();
+		}
+
+		if($action_type=="check_url_api"){
+			$input = $request->all();
+
+			$url = $input["url"];
+			$where = array('page_type'=>$page_type,'url'=>$url);
+			if(!empty($input["id"])){
+				$where = array('page_type'=>$page_type,'url'=>$url,'id'=>$id);
+			}
+			$result = Manage_page_Model::where($where)->get();
+			if(empty($result)){
+				return "ok";
+			}else{
+				return "Error";
+			}
 		}
 
 		return view("vp-admin/$Page_view/$action_type")->with($data);
@@ -108,28 +143,5 @@ class Manage_page_Controller extends Controller
 		$message = $Page_title." - ".$message;
 		$this->Admin_Model->Add_Activity_log($message);
 		echo "ok";
-	}
-	public function check_url_api()
-	{
-		$Page_tbl 	= $this->Page_tbl;
-		$id 		= $_POST["id"];
-		$url 		= $_POST["url"];
-		$child_page = $_POST["page_url"];
-		if($child_page=="page"){
-			$child_page = "";
-		}
-		$where = "";
-		if($id!=""){
-			$where = " and id!='$id'";
-		}
-		$query = $this->db->query("select id from $Page_tbl where url='$url' and child_page='$child_page' and page_type='page' $where")->row();
-		if($query->id)
-		{
-			echo "Error";
-		}
-		else
-		{
-			echo "ok";
-		}
 	}
 }

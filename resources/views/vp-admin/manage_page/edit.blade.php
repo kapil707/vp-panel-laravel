@@ -10,6 +10,7 @@
 	{ ?>
 	<form class="form-horizontal" role="form" method="post" enctype="multipart/form-data">
 		@csrf
+		<input type="hidden" name="post_data" value="edit">
 		<div class="col-xs-9">
 			<div class="ibox float-e-margins">
 				<div class="ibox-content">

@@ -36,6 +36,8 @@ Route::get('vp-admin/profile_management', [Profile_Management_Controller::class,
 
 
 /*******manage_page*************/
+Route::any('vp-admin/manage_page/',[Manage_page_Controller::class,'index']);
+
 Route::any('vp-admin/manage_page/{var1}', [Manage_page_Controller::class,'index']);
 
-Route::any('vp-admin/manage_page/',[Manage_page_Controller::class,'index']);
+Route::any('vp-admin/manage_page/{var1}/{var2}', [Manage_page_Controller::class,'index']);

@@ -19,7 +19,7 @@
 									Title
 								</th>
 								<th>
-									Date / Time
+									Update Time
 								</th>
 								<th>
 									Action
@@ -32,7 +32,7 @@
 						foreach ($result as $row)
 						{
 							?>
-							<tr id="row_<?= $row->id; ?>">
+							<tr id="row_<?= $row->id; ?>" <?php if($row->status==0){ ?> class="text-warning" <?php } ?>>
 								<td>
 									<?= $i++; ?>
 								</td>
