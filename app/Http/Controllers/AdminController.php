@@ -16,6 +16,7 @@ class AdminController extends Controller
         ]);
 
         $input = $request->all();
+        print_r($input);
         $admin_user = Model_tbl_user::where('email',$input['username'])->get();
         if(Crypt::decrypt($admin_user[0]->password)==$input['password']){
             $request->session()->put('admin_user_id',$admin_user[0]->id);
